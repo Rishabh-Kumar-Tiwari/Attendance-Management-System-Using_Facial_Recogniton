@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Toolbar title (used by layouts that reference @style/Toolbar.Title) -->
+    <style name="Toolbar.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <!-- Slightly smaller variant -->
+    <style name="Toolbar.Title.Small" parent="Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Small toolbar / compact toolbar size helper -->
+    <style name="ToolbarCompact">
+        <item name="android:layout_height">48dp</item>
+    </style>
+
+    <!-- Theme overlay for toolbar children if needed -->
+    <style name="CustomToolbarTheme">
+        <item name="android:fontFamily">@font/roboto</item>
+    </style>
+
+</resources>
