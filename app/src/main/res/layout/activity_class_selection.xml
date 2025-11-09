@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:title="Attendance Management System"
+        app:title="AttendEase"
         app:titleCentered="true"
         app:titleTextAppearance="@style/ToolbarTitleBold" />
 
@@ -29,7 +29,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Existing Classes : 0"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingTop="8dp"

@@ -29,7 +29,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Total Students : 0"
             android:textStyle="bold"
             android:textSize="18sp"
             android:paddingTop="8dp"

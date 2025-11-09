@@ -75,7 +75,7 @@ class ClassSelectionActivity : AppCompatActivity() {
         }
 
         binding.listClasses.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, adapterItems)
-        binding.headerView.text = "Your Classes : ${adapterItems.size}"
+        binding.headerView.text = "Existing Classes : ${adapterItems.size}"
     }
 
     private fun leadingInt(s: String): Int? {
