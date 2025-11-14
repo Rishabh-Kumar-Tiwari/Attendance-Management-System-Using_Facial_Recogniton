@@ -2,60 +2,60 @@ package com.example.attendancemanagementsystem
 
 import kotlin.math.sqrt
 
-// Simple in-memory recognition manager that stores embeddings and performs brute-force cosine-similarity matching.
 data class MatchResult(val id: String, val confidence: Float)
 
 object RecognitionManager {
-    // map studentId -> list of embeddings
-    private val store: MutableMap<String, MutableList<FloatArray>> = mutableMapOf()
 
-    /** Enroll one or more embeddings for a student id */
+    private val embeddingStore: MutableMap<String, MutableList<FloatArray>> = mutableMapOf()
+    private const val DEFAULT_THRESHOLD = 0.75f
+
     fun enroll(studentId: String, embeddings: List<FloatArray>) {
-        val list = store.getOrPut(studentId) { mutableListOf() }
-        list.addAll(embeddings)
+        val studentEmbeddings = embeddingStore.getOrPut(studentId) { mutableListOf() }
+        studentEmbeddings.addAll(embeddings)
     }
 
-    /** Remove a single student's embeddings at runtime */
     fun remove(studentId: String) {
-        store.remove(studentId)
+        embeddingStore.remove(studentId)
     }
 
-    /** Clear all enrolled data (for debug or class-switch) */
     fun clear() {
-        store.clear()
+        embeddingStore.clear()
     }
 
-    /**
-     * Recognize an embedding by brute-force cosine similarity.
-     * Returns MatchResult with best id and similarity value (0..1) or null if no match above threshold.
-     */
-    fun recognize(query: FloatArray, threshold: Float = 0.75f): MatchResult? {
-        var bestId: String? = null
-        var bestScore = -1f
-        for ((id, vectors) in store) {
-            for (v in vectors) {
-                val sim = cosine(query, v)
-                if (sim > bestScore) {
-                    bestScore = sim
-                    bestId = id
+    fun recognize(queryEmbedding: FloatArray, threshold: Float = DEFAULT_THRESHOLD): MatchResult? {
+        var bestMatchId: String? = null
+        var bestSimilarity = -1f
+
+        for ((studentId, embeddings) in embeddingStore) {
+            for (embedding in embeddings) {
+                val similarity = calculateCosineSimilarity(queryEmbedding, embedding)
+                if (similarity > bestSimilarity) {
+                    bestSimilarity = similarity
+                    bestMatchId = studentId
                 }
             }
         }
-        return if (bestId != null && bestScore >= threshold) MatchResult(bestId, bestScore) else null
+
+        return if (bestMatchId != null && bestSimilarity >= threshold) {
+            MatchResult(bestMatchId, bestSimilarity)
+        } else {
+            null
+        }
     }
 
-    /** cosine similarity between two float arrays */
-    private fun cosine(a: FloatArray, b: FloatArray): Float {
-        var dot = 0f
-        var na = 0f
-        var nb = 0f
-        val len = minOf(a.size, b.size)
-        for (i in 0 until len) {
-            dot += a[i] * b[i]
-            na += a[i] * a[i]
-            nb += b[i] * b[i]
+    private fun calculateCosineSimilarity(vectorA: FloatArray, vectorB: FloatArray): Float {
+        var dotProduct = 0f
+        var normA = 0f
+        var normB = 0f
+
+        val length = minOf(vectorA.size, vectorB.size)
+        for (i in 0 until length) {
+            dotProduct += vectorA[i] * vectorB[i]
+            normA += vectorA[i] * vectorA[i]
+            normB += vectorB[i] * vectorB[i]
         }
-        val denom = sqrt(na) * sqrt(nb)
-        return if (denom == 0f) 0f else dot / denom
+
+        val denominator = sqrt(normA) * sqrt(normB)
+        return if (denominator == 0f) 0f else dotProduct / denominator
     }
 }

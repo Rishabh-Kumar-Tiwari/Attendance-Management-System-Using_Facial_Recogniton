@@ -2,7 +2,11 @@ package com.example.attendancemanagementsystem
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
+import android.graphics.Matrix
+import android.graphics.Rect
+import android.graphics.YuvImage
 import android.media.Image
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
@@ -10,8 +14,9 @@ import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import java.io.ByteArrayOutputStream
 
-class FaceDetectorHelper(private val context: Context) {
+class FaceDetectorHelper(context: Context) {
 
     private val detector: FaceDetector
 
@@ -25,59 +30,59 @@ class FaceDetectorHelper(private val context: Context) {
         detector = FaceDetection.getClient(options)
     }
 
-    // Detect faces in InputImage and forward result to callback.
-    fun detect(inputImage: InputImage, cb: (List<Face>) -> Unit) {
+    fun detect(inputImage: InputImage, onResult: (List<Face>) -> Unit) {
         detector.process(inputImage)
-            .addOnSuccessListener { faces ->
-                cb(faces)
-            }
-            .addOnFailureListener { e ->
-                Log.w("FaceDetectorHelper", "detect failed: ${e.message}")
-                cb(emptyList())
+            .addOnSuccessListener { faces -> onResult(faces) }
+            .addOnFailureListener { exception ->
+                Log.w("FaceDetectorHelper", "Face detection failed: ${exception.message}")
+                onResult(emptyList())
             }
     }
 
     fun mediaImageToBitmap(mediaImage: Image, rotationDegrees: Int): Bitmap {
-        val nv21 = yuv420ToNv21(mediaImage)
-        val yuvImage = android.graphics.YuvImage(nv21, ImageFormat.NV21, mediaImage.width, mediaImage.height, null)
-        val out = java.io.ByteArrayOutputStream()
-        yuvImage.compressToJpeg(android.graphics.Rect(0, 0, mediaImage.width, mediaImage.height), 100, out)
-        val yuv = out.toByteArray()
-        var bmp = android.graphics.BitmapFactory.decodeByteArray(yuv, 0, yuv.size)
+        val nv21Data = convertYuv420ToNv21(mediaImage)
+        val yuvImage = YuvImage(nv21Data, ImageFormat.NV21, mediaImage.width, mediaImage.height, null)
+
+        val outputStream = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, mediaImage.width, mediaImage.height), 100, outputStream)
+        val jpegData = outputStream.toByteArray()
+
+        var bitmap = BitmapFactory.decodeByteArray(jpegData, 0, jpegData.size)
+
         if (rotationDegrees != 0) {
-            val matrix = android.graphics.Matrix()
-            matrix.postRotate(rotationDegrees.toFloat())
-            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+            val rotationMatrix = Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
         }
-        return bmp
+
+        return bitmap
     }
 
-    private fun yuv420ToNv21(image: Image): ByteArray {
-        val yBuffer = image.planes[0].buffer
-        val uBuffer = image.planes[1].buffer
-        val vBuffer = image.planes[2].buffer
+    private fun convertYuv420ToNv21(image: Image): ByteArray {
+        val yPlane = image.planes[0].buffer
+        val uPlane = image.planes[1].buffer
+        val vPlane = image.planes[2].buffer
 
-        val ySize = yBuffer.remaining()
-        val uSize = uBuffer.remaining()
-        val vSize = vBuffer.remaining()
+        val ySize = yPlane.remaining()
+        val uSize = uPlane.remaining()
+        val vSize = vPlane.remaining()
 
         val nv21 = ByteArray(ySize + uSize + vSize)
 
-        yBuffer.get(nv21, 0, ySize)
+        yPlane.get(nv21, 0, ySize)
 
-        var pos = ySize
+        val uData = ByteArray(uSize)
+        val vData = ByteArray(vSize)
+        uPlane.get(uData)
+        vPlane.get(vData)
 
-        val u = ByteArray(uSize)
-        val v = ByteArray(vSize)
-        uBuffer.get(u)
-        vBuffer.get(v)
-
-        var i = 0
-        while (i < uSize) {
-            nv21[pos++] = v[i]
-            nv21[pos++] = u[i]
-            i++
+        var position = ySize
+        var index = 0
+        while (index < uSize) {
+            nv21[position++] = vData[index]
+            nv21[position++] = uData[index]
+            index++
         }
+
         return nv21
     }
 }

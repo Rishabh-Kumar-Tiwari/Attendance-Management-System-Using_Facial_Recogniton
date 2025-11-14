@@ -5,23 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- single toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarAttendance"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="@dimen/toolbar_height"
         android:background="?attr/colorPrimary"
-        app:title="Attendance Records"
+        app:title="@string/title_attendance_records"
         app:titleCentered="true"
         app:titleTextAppearance="@style/ToolbarTitleBold" />
 
-    <!-- main content sits below toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="12dp"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="@dimen/toolbar_height">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,7 +32,7 @@
                 android:id="@+id/txtDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="YYYY-MM-DD"
+                android:text="@string/date_placeholder"
                 android:textStyle="bold"/>
 
             <Button
@@ -42,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Pick date"/>
+                android:text="@string/btn_pick_date"/>
 
             <View
                 android:layout_width="0dp"
@@ -53,7 +51,7 @@
                 android:id="@+id/txtCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Records: 0"/>
+                android:text="@string/records_count"/>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -72,9 +70,8 @@
                 android:id="@+id/btnExport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Export CSV"/>
+                android:text="@string/btn_export_csv"/>
 
-            <!-- flexible spacer pushes the Refresh button to the far right -->
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -84,7 +81,7 @@
                 android:id="@+id/btnRefresh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Refresh" />
+                android:text="@string/btn_refresh" />
         </LinearLayout>
 
     </LinearLayout>

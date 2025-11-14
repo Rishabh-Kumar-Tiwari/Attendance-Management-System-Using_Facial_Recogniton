@@ -1,41 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- App Name -->
     <string name="app_name">AttendEase</string>
 
-    <!-- Common -->
     <string name="status_idle">Status: Idle</string>
-    <string name="status_camera_started">Camera started</string>
-    <string name="status_camera_stopped">Camera stopped</string>
+    <string name="status_camera_started">Camera Started</string>
+    <string name="status_camera_stopped">Camera Stopped</string>
+    <string name="switch_camera">Switch Camera</string>
+    <string name="camera_preview">Camera Preview</string>
+    <string name="delete">Delete</string>
 
-    <!-- MainActivity -->
-    <string name="title_main">Attendance Management</string>
+    <string name="title_main">Live Attendance</string>
     <string name="btn_start">Start</string>
     <string name="btn_stop">Stop</string>
     <string name="btn_enroll">Enroll</string>
     <string name="btn_attendance">Attendance</string>
     <string name="btn_mark_present">Mark Present</string>
-    <string name="switch_auto_mark">Auto Mark</string>
     <string name="mode_auto_mark">Mode: Auto Mark</string>
     <string name="mode_manual_mark">Mode: Manual Mark</string>
+    <string name="today_marked">Today\'s Marked: %1$d</string>
+    <string name="no_one_detected">No One Detected</string>
+    <string name="manual_confirm_hint">(Switch to Manual to confirm before marking)</string>
 
-    <!-- Enrollment -->
-    <string name="title_enrollment">Enroll Student</string>
+    <string name="msg_camera_permission_required">Camera permission is required!</string>
+    <string name="msg_selected_class">Selected Class: %1$s</string>
+    <string name="msg_no_class_selected">No class selected!</string>
+    <string name="msg_please_select_class">Please select a class to start</string>
+    <string name="msg_select_class_first">Select a class first</string>
+    <string name="msg_camera_start_failed">Camera Start Failed: %1$s</string>
+    <string name="msg_stop_camera_error">Stop Camera Error: %1$s</string>
+    <string name="msg_recently_marked">Recently Marked: %1$s</string>
+    <string name="msg_marked_present">Marked Present: %1$s</string>
+    <string name="msg_auto_marked">Auto-Marked: %1$s</string>
+    <string name="msg_already_marked">Already Marked: %1$s</string>
+    <string name="msg_no_recognized_student">No Recognized Student</string>
+
+    <string name="status_camera_started_class">Camera started (%1$s) for %2$s</string>
+    <string name="status_unknown">Unknown</string>
+    <string name="status_recognizing">Recognizing %1$s (%2$d/%3$d)</string>
+    <string name="status_detected">Detected: %1$s</string>
+    <string name="status_recognition_error">Recognition Error</string>
+
+    <string name="format_roll_conf">Roll: %1$s | Confidence: %2$s</string>
+    <string name="format_name_roll">%1$s (%2$s)</string>
+    <string name="format_datetime">yyyy-MM-dd HH:mm:ss</string>
+
+    <string name="camera_front">Front</string>
+    <string name="camera_back">Back</string>
+
+    <string name="title_enrollment">Student Enrollment</string>
     <string name="hint_name">Enter Full Name</string>
     <string name="hint_roll">Enter Roll Number</string>
-    <string name="btn_capture">Capture Sample</string>
-    <string name="btn_submit">Submit Enrollment</string>
-    <string name="btn_back">Back</string>
+    <string name="btn_capture">Capture Face</string>
+    <string name="btn_submit">Enroll Student</string>
     <string name="msg_capture_instruction">Align your face in the frame and tap Capture.</string>
 
-    <!-- Attendance -->
+    <string name="msg_editing_student">Editing Student: %1$s</string>
+    <string name="msg_model_not_loaded">Model not loaded. Put facenet.tflite into assets.</string>
+    <string name="msg_captured_samples">Captured %1$d Samples</string>
+    <string name="msg_captured_sample">Captured Sample %1$d</string>
+    <string name="msg_embedding_failed">Embedding Failed: %1$s</string>
+    <string name="msg_no_face_available">No face available to capture. Align your face in preview.</string>
+    <string name="msg_enter_name_roll">Enter Name and Roll Number</string>
+    <string name="msg_saved_successfully">Saved %1$s (%2$s) Successfully</string>
+    <string name="msg_save_failed">Save Failed: %1$s</string>
+    <string name="msg_minimum_samples_required">Please capture at least %1$d face samples before submitting enrollment!</string>
+
     <string name="title_attendance_records">Attendance Records</string>
     <string name="btn_export_csv">Export CSV</string>
     <string name="btn_refresh">Refresh</string>
     <string name="btn_pick_date">Pick Date</string>
+    <string name="date_placeholder">YYYY-MM-DD</string>
+    <string name="records_count">Records: %1$d</string>
 
-    <!-- Splash -->
-    <string name="title_splash">Attendance Management System</string>
+    <string name="msg_no_class_specified">No class specified — showing no records</string>
+    <string name="msg_master_csv_ready">Master CSV ready: %1$s</string>
+    <string name="msg_export_failed">Export failed: %1$s</string>
+    <string name="msg_record_removed">Record removed</string>
+    <string name="msg_remove_failed">Remove failed</string>
+    <string name="msg_share_csv">Share CSV</string>
+
+    <string name="title_class_selection">AttendEase</string>
+    <string name="btn_new_class">New Class</string>
+    <string name="btn_manage_classes">Manage Classes</string>
+
+    <string name="title_class_detail">Class Details</string>
+    <string name="btn_enroll_student">Enroll Student</string>
+    <string name="btn_delete_class">Delete Class</string>
+
+    <string name="msg_total_students">Total Students : %1$d</string>
+    <string name="dialog_delete_class_title">Delete Class?</string>
+    <string name="dialog_delete_class_message">This will permanently delete the class and all student data. This cannot be undone.</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="option_edit_student">Edit Student</string>
+    <string name="option_remove_from_class">Remove from Class</string>
+    <string name="option_delete_enrollment">Delete Enrollment (Embeddings + Metadata)</string>
+    <string name="dialog_remove_title">Remove from Class?</string>
+    <string name="dialog_remove_message">This will remove the Student from this class but keep their data.</string>
+    <string name="btn_remove">Remove</string>
+    <string name="dialog_delete_enrollment_title">Delete Enrollment?</string>
+    <string name="dialog_delete_enrollment_message">This will permanently delete the Student\'s Embeddings and Metadata. This cannot be undone.</string>
+
+    <string name="msg_existing_classes">Existing Classes : %1$d</string>
+    <string name="hint_class_name">Class Name</string>
+    <string name="hint_subject_optional">Subject (optional)</string>
+    <string name="dialog_create_class_title">Create Class</string>
+    <string name="btn_create">Create</string>
+    <string name="msg_enter_class_name">Enter a Class Name</string>
+    <string name="msg_no_classes_to_manage">No classes to manage. Create one first.</string>
+    <string name="dialog_select_class_title">Select class to manage</string>
+    <string name="label_class_default">Class</string>
+
+    <string name="placeholder_name">Name</string>
+    <string name="placeholder_roll">Roll</string>
+    <string name="placeholder_time">Time</string>
+
 
 </resources>

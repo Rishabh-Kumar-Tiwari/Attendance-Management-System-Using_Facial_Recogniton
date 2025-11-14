@@ -6,43 +6,42 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 
 object StudentStorage {
+
     private const val FILE_NAME = "students.json"
     private val gson = Gson()
 
     private fun file(context: Context) = File(context.filesDir, FILE_NAME)
 
-    private fun loadRaw(context: Context): MutableMap<String, Student> {
-        val f = file(context)
-        if (!f.exists()) return mutableMapOf()
+    private fun loadStudentMap(context: Context): MutableMap<String, Student> {
+        val studentFile = file(context)
+        if (!studentFile.exists()) return mutableMapOf()
+
         return try {
-            val json = f.readText()
+            val json = studentFile.readText()
             val type = object : TypeToken<MutableMap<String, Student>>() {}.type
-            gson.fromJson<MutableMap<String, Student>>(json, type) ?: mutableMapOf()
+            gson.fromJson(json, type) ?: mutableMapOf()
         } catch (e: Exception) {
             mutableMapOf()
         }
     }
 
-    private fun saveRaw(context: Context, map: Map<String, Student>) {
-        val f = file(context)
-        val json = gson.toJson(map)
-        f.writeText(json)
+    private fun saveStudentMap(context: Context, studentMap: Map<String, Student>) {
+        file(context).writeText(gson.toJson(studentMap))
     }
 
     fun createOrUpdate(context: Context, student: Student) {
-        val map = loadRaw(context)
-        map[student.id] = student
-        saveRaw(context, map)
+        val studentMap = loadStudentMap(context)
+        studentMap[student.id] = student
+        saveStudentMap(context, studentMap)
     }
 
-    fun getStudent(context: Context, id: String): Student? {
-        val map = loadRaw(context)
-        return map[id]
+    fun getStudent(context: Context, studentId: String): Student? {
+        return loadStudentMap(context)[studentId]
     }
 
-    fun deleteStudent(context: Context, id: String) {
-        val map = loadRaw(context)
-        map.remove(id)
-        saveRaw(context, map)
+    fun deleteStudent(context: Context, studentId: String) {
+        val studentMap = loadStudentMap(context)
+        studentMap.remove(studentId)
+        saveStudentMap(context, studentMap)
     }
 }

@@ -4,9 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +16,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AttendanceActivity : AppCompatActivity() {
+class AttendanceActivity : BaseActivity() {
+
     private lateinit var binding: ActivityAttendanceBinding
     private val adapter = AttendanceAdapter()
     private val dayFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
@@ -30,14 +29,6 @@ class AttendanceActivity : AppCompatActivity() {
         binding = ActivityAttendanceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        InsetsUtil.applyEdgeToEdge(
-            window = window,
-            root = binding.root,
-            toolbar = binding.toolbarAttendance,
-            contentContainer = binding.recycler.parent as View,
-            navAnchoredView = binding.recycler.parent as View
-        )
-
         setSupportActionBar(binding.toolbarAttendance)
 
         binding.recycler.layoutManager = LinearLayoutManager(this)
@@ -46,44 +37,19 @@ class AttendanceActivity : AppCompatActivity() {
         classId = intent.getStringExtra("classId") ?: ""
 
         if (classId.isBlank()) {
-            Toast.makeText(this, "No class specified — showing no records", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.msg_no_class_specified), Toast.LENGTH_LONG).show()
         }
 
         updateDateDisplay()
         loadRecordsFor(currentDate)
+        setupListeners()
+    }
 
+    private fun setupListeners() {
         binding.btnPickDate.setOnClickListener { showDatePicker() }
-
-        // Export now directly shares the master CSV
-        binding.btnExport.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val outFile: File = ClassAttendanceManager.getMasterCsvFile(this@AttendanceActivity, classId)
-                    withContext(Dispatchers.Main) {
-                        showToast("Master CSV ready: ${outFile.name}")
-                        shareFile(outFile, "text/csv")
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        showToast("Export failed: ${e.localizedMessage}")
-                    }
-                }
-            }
-        }
-
+        binding.btnExport.setOnClickListener { exportMasterCsv() }
         binding.btnRefresh.setOnClickListener { loadRecordsFor(currentDate) }
-
-        adapter.onDeleteClick = { _, record ->
-            lifecycleScope.launch(Dispatchers.IO) {
-                val removed = ClassAttendanceManager.removeRecord(this@AttendanceActivity, currentDate, classId, record)
-                withContext(Dispatchers.Main) {
-                    if (removed) {
-                        showToast("Record removed")
-                        loadRecordsFor(currentDate)
-                    } else showToast("Remove failed")
-                }
-            }
-        }
+        adapter.onDeleteClick = { record -> deleteRecord(record) }
     }
 
     private fun updateDateDisplay() {
@@ -91,52 +57,69 @@ class AttendanceActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val c = Calendar.getInstance().apply { time = currentDate }
-        val dp = DatePickerDialog(
+        val calendar = Calendar.getInstance().apply { time = currentDate }
+        DatePickerDialog(
             this,
-            { _, y, m, d ->
-                val cal = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, y)
-                    set(Calendar.MONTH, m)
-                    set(Calendar.DAY_OF_MONTH, d)
-                }
-                currentDate = cal.time
+            { _, year, month, day ->
+                currentDate = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.DAY_OF_MONTH, day)
+                }.time
                 updateDateDisplay()
                 loadRecordsFor(currentDate)
             },
-            c.get(Calendar.YEAR),
-            c.get(Calendar.MONTH),
-            c.get(Calendar.DAY_OF_MONTH)
-        )
-        dp.show()
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     private fun loadRecordsFor(date: Date) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val list = ClassAttendanceManager.getRecordsForDate(this@AttendanceActivity, date, classId)
+            val records = ClassAttendanceManager.getRecordsForDate(this@AttendanceActivity, date, classId)
             withContext(Dispatchers.Main) {
-                adapter.submitList(list)
-                binding.txtCount.text = "Records: ${list.size}"
+                adapter.submitList(records)
+                binding.txtCount.text = getString(R.string.records_count, records.size)
             }
         }
     }
 
-    private fun shareFile(file: File, mime: String) {
-        val uri: Uri = FileProvider.getUriForFile(
-            this,
-            "${applicationContext.packageName}.fileprovider",
-            file
-        )
-        val share = Intent(Intent.ACTION_SEND).apply {
-            type = mime
+    private fun exportMasterCsv() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val csvFile = ClassAttendanceManager.getMasterCsvFile(this@AttendanceActivity, classId)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AttendanceActivity, getString(R.string.msg_master_csv_ready, csvFile.name), Toast.LENGTH_SHORT).show()
+                    shareFile(csvFile, "text/csv")
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AttendanceActivity, getString(R.string.msg_export_failed, e.localizedMessage ?: ""), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun deleteRecord(record: AttendanceRecord) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val removed = ClassAttendanceManager.removeRecord(this@AttendanceActivity, currentDate, classId, record)
+            withContext(Dispatchers.Main) {
+                val message = if (removed) getString(R.string.msg_record_removed) else getString(R.string.msg_remove_failed)
+                Toast.makeText(this@AttendanceActivity, message, Toast.LENGTH_SHORT).show()
+                if (removed) loadRecordsFor(currentDate)
+            }
+        }
+    }
+
+    private fun shareFile(file: File, mimeType: String) {
+        val uri: Uri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.fileprovider", file)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = mimeType
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        startActivity(Intent.createChooser(share, "Share CSV"))
-    }
-
-    private fun showToast(msg: String) {
-        runOnUiThread { Toast.makeText(this@AttendanceActivity, msg, Toast.LENGTH_SHORT).show() }
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.msg_share_csv)))
     }
 
     override fun onResume() {

@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Main application theme (dark) -->
     <style name="Theme.AttendanceManagementSystem" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Keep brand color consistent -->
         <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryContainer">@color/purple_300</item>
-        <item name="colorOnPrimary">@color/on_primary</item>
-
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/teal_400</item>
         <item name="colorOnSecondary">@color/white</item>
-
-        <!-- Dark surfaces -->
         <item name="android:windowBackground">@color/gray_900</item>
-        <item name="colorSurface">@color/gray_800</item>
-        <item name="colorOnSurface">@color/on_surface_dark</item>
-
-        <!-- Keep system bars untouched -->
+        <item name="colorSurface">@color/gray_850</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorError">@color/red_500</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:statusBarColor">#FF1C1C1C</item>
         <item name="android:windowLightStatusBar">false</item>
-
-        <!-- Typography -->
-        <item name="android:fontFamily">@font/roboto</item>
-
-        <!-- Widgets -->
-        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
-        <item name="switchStyle">@style/Widget.Material3.CompoundButton.Switch</item>
-
-        <!-- Toolbar style (defined in styles.xml) -->
+        <item name="android:navigationBarColor">@color/gray_900</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
         <item name="toolbarStyle">@style/CustomToolbar</item>
-        <item name="materialToolbarStyle">@style/CustomToolbar</item>
-
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Theme.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
 </resources>

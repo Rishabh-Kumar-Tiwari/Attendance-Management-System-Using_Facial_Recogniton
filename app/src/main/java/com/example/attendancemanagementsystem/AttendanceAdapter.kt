@@ -9,38 +9,40 @@ import com.example.attendancemanagementsystem.databinding.ItemAttendanceBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AttendanceAdapter : ListAdapter<AttendanceRecord, AttendanceAdapter.VH>(DIFF) {
-    var onDeleteClick: ((Int, AttendanceRecord) -> Unit)? = null
-    private val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+class AttendanceAdapter : ListAdapter<AttendanceRecord, AttendanceAdapter.ViewHolder>(DiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val b = ItemAttendanceBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return VH(b)
+    var onDeleteClick: ((AttendanceRecord) -> Unit)? = null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemAttendanceBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        val r = getItem(position)
-        holder.bind(r)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
     }
 
-    inner class VH(private val b: ItemAttendanceBinding) : RecyclerView.ViewHolder(b.root) {
-        fun bind(r: AttendanceRecord) {
-            b.tvName.text = r.name
-            b.tvRoll.text = r.roll
-            b.tvTs.text = sdf.format(Date(r.timestamp))
-            b.btnDelete.setOnClickListener { onDeleteClick?.invoke(bindingAdapterPosition, r) }
+    inner class ViewHolder(private val binding: ItemAttendanceBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        private val dateFormat = SimpleDateFormat(binding.root.context.getString(R.string.format_datetime), Locale.US)
+
+        fun bind(record: AttendanceRecord) {
+            binding.tvName.text = record.name
+            binding.tvRoll.text = record.roll
+            binding.tvTs.text = dateFormat.format(Date(record.timestamp))
+            binding.btnDelete.setOnClickListener {
+                onDeleteClick?.invoke(record)
+            }
         }
     }
 
-    companion object {
-        val DIFF = object : DiffUtil.ItemCallback<AttendanceRecord>() {
-            override fun areItemsTheSame(oldItem: AttendanceRecord, newItem: AttendanceRecord): Boolean {
-                return oldItem.timestamp == newItem.timestamp && oldItem.roll == newItem.roll
-            }
+    private object DiffCallback : DiffUtil.ItemCallback<AttendanceRecord>() {
+        override fun areItemsTheSame(oldItem: AttendanceRecord, newItem: AttendanceRecord): Boolean {
+            return oldItem.timestamp == newItem.timestamp && oldItem.roll == newItem.roll
+        }
 
-            override fun areContentsTheSame(oldItem: AttendanceRecord, newItem: AttendanceRecord): Boolean {
-                return oldItem == newItem
-            }
+        override fun areContentsTheSame(oldItem: AttendanceRecord, newItem: AttendanceRecord): Boolean {
+            return oldItem == newItem
         }
     }
 }

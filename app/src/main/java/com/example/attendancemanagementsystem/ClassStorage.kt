@@ -1,41 +1,47 @@
 package com.example.attendancemanagementsystem
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.*
 
 object ClassStorage {
+
     private const val FILE_NAME = "classes.json"
     private val gson = Gson()
 
     private fun file(context: Context) = File(context.filesDir, FILE_NAME)
 
     fun listClasses(context: Context): List<ClassRoom> {
-        val f = file(context)
-        if (!f.exists()) return emptyList()
+        val classFile = file(context)
+        if (!classFile.exists()) return emptyList()
+
         return try {
-            val json = f.readText()
+            val json = classFile.readText()
             val type = object : TypeToken<List<ClassRoom>>() {}.type
-            gson.fromJson<List<ClassRoom>>(json, type) ?: emptyList()
+            gson.fromJson(json, type) ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
     }
 
     fun saveAll(context: Context, classes: List<ClassRoom>) {
-        val f = file(context)
-        f.writeText(gson.toJson(classes))
+        file(context).writeText(gson.toJson(classes))
     }
 
     fun createClass(context: Context, name: String, subject: String = ""): ClassRoom {
         val classes = listClasses(context).toMutableList()
-        val id = UUID.randomUUID().toString()
-        val room = ClassRoom(id, name, subject, mutableListOf())
-        classes.add(room)
+        val newClass = ClassRoom(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            subject = subject,
+            studentIds = mutableListOf()
+        )
+        classes.add(newClass)
         saveAll(context, classes)
-        return room
+        return newClass
     }
 
     fun getClass(context: Context, id: String): ClassRoom? {
@@ -44,67 +50,65 @@ object ClassStorage {
 
     fun addStudentToClass(context: Context, classId: String, studentId: String) {
         val classes = listClasses(context).toMutableList()
-        val idx = classes.indexOfFirst { it.id == classId }
-        if (idx >= 0) {
-            val room = classes[idx]
-            if (!room.studentIds.contains(studentId)) room.studentIds.add(studentId)
-            saveAll(context, classes)
+        val classIndex = classes.indexOfFirst { it.id == classId }
 
-            try {
-                AttendanceStorage.ensureMasterCsvHasRoster(context, classId)
-            } catch (e: Exception) {
-                android.util.Log.w("ClassStorage", "Failed to ensure master CSV roster: ${e.message}")
+        if (classIndex >= 0) {
+            val classRoom = classes[classIndex]
+            if (!classRoom.studentIds.contains(studentId)) {
+                classRoom.studentIds.add(studentId)
+                saveAll(context, classes)
+                ensureMasterCsvRosterSafely(context, classId)
             }
         }
     }
 
     fun removeStudentFromClass(context: Context, classId: String, studentId: String) {
         val classes = listClasses(context).toMutableList()
-        val idx = classes.indexOfFirst { it.id == classId }
-        if (idx >= 0) {
-            val room = classes[idx]
-            if (room.studentIds.remove(studentId)) {
-                saveAll(context, classes)
+        val classIndex = classes.indexOfFirst { it.id == classId }
 
-                try {
-                    AttendanceStorage.removeStudentFromMasterCsv(context, classId, studentId)
-                } catch (e: Exception) {
-                    android.util.Log.w("ClassStorage", "Failed to remove from master CSV: ${e.message}")
-                }
+        if (classIndex >= 0) {
+            val classRoom = classes[classIndex]
+            if (classRoom.studentIds.remove(studentId)) {
+                saveAll(context, classes)
+                removeStudentFromCsvSafely(context, classId, studentId)
             }
         }
     }
 
-    /**
-     * Delete a class and remove all enrollments & metadata of students listed in the class.
-     * This enforces class-specific embeddings.
-     */
     fun deleteClass(context: Context, classId: String) {
         val classes = listClasses(context).toMutableList()
-        val idx = classes.indexOfFirst { it.id == classId }
-        if (idx < 0) return
+        val classIndex = classes.indexOfFirst { it.id == classId }
+        if (classIndex < 0) return
 
-        val room = classes[idx]
-        // Remove enrollments and master CSV rows
-        for (sid in room.studentIds) {
-            try {
-                EmbeddingStorage.removeEnrollment(context, sid)
-            } catch (_: Exception) {}
-            try {
-                StudentStorage.deleteStudent(context, sid)
-            } catch (_: Exception) {}
-            try {
-                RecognitionManager.remove(sid)
-            } catch (_: Exception) {}
-            try {
-                AttendanceStorage.removeStudentFromMasterCsv(context, classId, sid)
-            } catch (e: Exception) {
-                android.util.Log.w("ClassStorage", "Failed to remove $sid from master CSV during class delete: ${e.message}")
-            }
+        val classRoom = classes[classIndex]
+        classRoom.studentIds.forEach { studentId ->
+            removeStudentData(context, studentId, classId)
         }
 
-        // Remove class entry and save
-        classes.removeAt(idx)
+        classes.removeAt(classIndex)
         saveAll(context, classes)
+    }
+
+    private fun removeStudentData(context: Context, studentId: String, classId: String) {
+        runCatching { EmbeddingStorage.removeEnrollment(context, studentId) }
+        runCatching { StudentStorage.deleteStudent(context, studentId) }
+        runCatching { RecognitionManager.remove(studentId) }
+        removeStudentFromCsvSafely(context, classId, studentId)
+    }
+
+    private fun ensureMasterCsvRosterSafely(context: Context, classId: String) {
+        try {
+            AttendanceStorage.ensureMasterCsvHasRoster(context, classId)
+        } catch (e: Exception) {
+            Log.w("ClassStorage", "Failed to ensure master CSV roster: ${e.message}")
+        }
+    }
+
+    private fun removeStudentFromCsvSafely(context: Context, classId: String, studentId: String) {
+        try {
+            AttendanceStorage.removeStudentFromMasterCsv(context, classId, studentId)
+        } catch (e: Exception) {
+            Log.w("ClassStorage", "Failed to remove student from master CSV: ${e.message}")
+        }
     }
 }

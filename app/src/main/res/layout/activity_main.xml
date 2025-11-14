@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- AppBar + Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
@@ -16,16 +15,15 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="@dimen/toolbar_height"
             android:background="?attr/colorPrimary"
-            android:elevation="2dp"
+            android:elevation="4dp"
             app:navigationIconTint="?attr/colorOnPrimary"
-            app:title="Live Attendance"
+            app:title="@string/title_main"
             app:titleCentered="true"
             app:titleTextAppearance="@style/ToolbarTitleBold" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Scrollable content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,12 +37,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Attendance count & status -->
             <TextView
                 android:id="@+id/txtAttendanceCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Today's marked: 0"
+                android:text="@string/today_marked"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="6dp"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
@@ -52,11 +50,10 @@
                 android:id="@+id/txtStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Status: Idle"
+                android:text="@string/status_idle"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:paddingBottom="8dp"/>
 
-            <!-- Camera Preview card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/preview_card"
                 android:layout_width="match_parent"
@@ -75,29 +72,27 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         app:implementationMode="performance"
-                        android:contentDescription="Camera preview"/>
+                        android:contentDescription="@string/camera_preview"/>
 
                     <com.example.attendancemanagementsystem.OverlayView
                         android:id="@+id/overlayView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 
-                    <!-- Camera switch icon overlay (top-right). -->
                     <ImageButton
                         android:id="@+id/btnSwitchCamera"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:layout_margin="12dp"
                         android:layout_gravity="top|end"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Switch Camera"
-                        android:padding="6dp"
-                        app:tint="@android:color/white"
-                        app:srcCompat="@drawable/ic_cameraswitch" />
+                        android:contentDescription="@string/switch_camera"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_cameraswitch"
+                        app:tint="@android:color/white" />
                 </FrameLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Recognized face info card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/recognized_card"
                 android:layout_width="match_parent"
@@ -115,7 +110,7 @@
                         android:id="@+id/txtRecognizedName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="No one detected"
+                        android:text="@string/no_one_detected"
                         android:textStyle="bold"
                         android:textSize="@dimen/title_text"/>
 
@@ -130,13 +125,12 @@
                         android:id="@+id/txtRecognizedHint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="(Switch to Manual to confirm before marking)"
+                        android:text="@string/manual_confirm_hint"
                         android:paddingTop="6dp"
                         android:textAppearance="?attr/textAppearanceCaption"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Controls row (Start / Stop / Enroll) -->
             <LinearLayout
                 android:id="@+id/controls"
                 android:layout_width="match_parent"
@@ -173,7 +167,6 @@
                     android:layout_marginStart="8dp"/>
             </LinearLayout>
 
-            <!-- Mode toggle + Mark button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -185,7 +178,7 @@
                     android:id="@+id/txtMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mode: Auto Mark"
+                    android:text="@string/mode_auto_mark"
                     android:layout_marginEnd="8dp"/>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
@@ -210,11 +203,10 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="12dp"/>
+                android:layout_height="16dp"/>
         </LinearLayout>
     </ScrollView>
 
-    <!-- FAB for Attendance -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAttendance"
         android:layout_width="wrap_content"

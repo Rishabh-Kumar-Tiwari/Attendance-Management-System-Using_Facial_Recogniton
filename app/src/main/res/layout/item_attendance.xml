@@ -25,21 +25,21 @@
                 android:id="@+id/tvName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name"
+                android:text="@string/placeholder_name"
                 android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/tvRoll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Roll"
+                android:text="@string/placeholder_roll"
                 android:paddingTop="4dp"/>
 
             <TextView
                 android:id="@+id/tvTs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Time"
+                android:text="@string/placeholder_time"
                 android:paddingTop="4dp"
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
         </LinearLayout>
@@ -50,6 +50,7 @@
             android:layout_height="48dp"
             android:src="@drawable/ic_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="6dp" />
+            android:padding="6dp"
+            android:contentDescription="@string/delete" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

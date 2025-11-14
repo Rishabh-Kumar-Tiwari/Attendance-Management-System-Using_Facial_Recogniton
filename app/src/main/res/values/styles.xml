@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Toolbar / title appearances -->
-    <style name="ToolbarTitleBold" parent="TextAppearance.Material3.TitleLarge">
+    <style name="CustomToolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="titleTextColor">?attr/colorOnPrimary</item>
+        <item name="navigationIconTint">?attr/colorOnPrimary</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <style name="CustomToolbarTheme" parent="ThemeOverlay.Material3.Toolbar.Surface">
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+        <item name="colorOnSurface">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="ToolbarTitleBold" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textSize">19sp</item>
     </style>
 
     <style name="Toolbar.Title" parent="TextAppearance.Material3.TitleLarge">
@@ -18,33 +30,8 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <!-- Compact toolbar helper -->
-    <style name="ToolbarCompact">
-        <item name="android:layout_height">48dp</item>
-    </style>
-
-    <!-- App toolbar style (used as materialToolbarStyle / toolbarStyle) -->
-    <style name="CustomToolbar" parent="Widget.MaterialComponents.Toolbar">
-        <!-- background uses theme's colorPrimary -->
-        <item name="android:background">?attr/colorPrimary</item>
-        <item name="titleTextColor">?attr/colorOnPrimary</item>
-        <item name="subtitleTextColor">?attr/colorOnPrimary</item>
-        <item name="navigationIconTint">?attr/colorOnPrimary</item>
-        <item name="android:tint">?attr/colorOnPrimary</item>
-        <item name="android:elevation">4dp</item>
-        <item name="android:layout_height">?attr/actionBarSize</item>
-    </style>
-
-    <!-- Small overlay theme you may attach to AppBar/Toolbar children if needed -->
-    <style name="CustomToolbarTheme">
-        <item name="android:fontFamily">@font/roboto</item>
-    </style>
-
-    <!-- Delete button widget style (Material3 based) -->
     <style name="Widget.App.Button.Delete" parent="Widget.Material3.Button">
-        <!-- backgroundTint is used by MaterialButton; android:backgroundTint included for compatibility -->
         <item name="backgroundTint">@color/red_500</item>
-        <item name="android:backgroundTint">@color/red_500</item>
         <item name="android:textColor">@color/white</item>
         <item name="rippleColor">@color/red_400</item>
     </style>

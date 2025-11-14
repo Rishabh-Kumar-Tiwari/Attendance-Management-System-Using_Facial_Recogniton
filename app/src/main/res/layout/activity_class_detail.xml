@@ -5,25 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="@dimen/toolbar_height"
         android:background="?attr/colorPrimary"
-        app:title="Class Details"
+        app:title="@string/title_class_detail"
         app:titleCentered="true"
         app:titleTextAppearance="@style/ToolbarTitleBold" />
 
-    <!-- Main content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="12dp"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="@dimen/toolbar_height">
 
-        <!-- Header -->
         <TextView
             android:id="@+id/headerView"
             android:layout_width="match_parent"
@@ -37,7 +34,6 @@
             android:textColor="@android:color/white"
             android:layout_marginBottom="8dp"/>
 
-        <!-- ListView -->
         <ListView
             android:id="@+id/listStudents"
             android:layout_width="match_parent"
@@ -47,7 +43,6 @@
             android:dividerHeight="1dp"
             android:layout_marginBottom="8dp" />
 
-        <!-- Bottom row buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,9 +55,8 @@
                 android:id="@+id/btnAddStudent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enroll Student"/>
+                android:text="@string/btn_enroll_student"/>
 
-            <!-- Flexible spacer pushes the Delete button to the right -->
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -73,7 +67,7 @@
                 style="@style/Widget.App.Button.Delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete Class" />
+                android:text="@string/btn_delete_class" />
         </LinearLayout>
     </LinearLayout>
 

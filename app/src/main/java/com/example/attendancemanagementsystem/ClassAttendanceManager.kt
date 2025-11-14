@@ -1,33 +1,25 @@
 package com.example.attendancemanagementsystem
 
 import android.content.Context
+import android.util.Log
 import java.io.File
 import java.util.*
 
 object ClassAttendanceManager {
 
-    /**
-     * Mark a student present if not already marked for the same class and date.
-     * Returns true if newly marked, false if already present.
-     */
     fun markIfNotMarked(context: Context, classId: String, studentId: String, name: String, roll: String): Boolean {
         val today = Date()
-        val list = AttendanceStorage.load(context, classId, today)
+        val existingRecords = AttendanceStorage.load(context, classId, today)
 
-        val already = list.any { it.roll == roll && it.name == name }
-        if (already) return false
-
-        val record = AttendanceRecord(roll, name, System.currentTimeMillis(), "Present", studentId, classId)
-        val newList = list.toMutableList()
-        newList.add(record)
-
-        AttendanceStorage.save(context, classId, today, newList)
-
-        try {
-            AttendanceStorage.updateMasterCsv(context, classId, today)
-        } catch (e: Exception) {
-            android.util.Log.w("ClassAttendanceManager", "updateMasterCsv failed: ${e.message}")
+        if (existingRecords.any { it.roll == roll && it.name == name }) {
+            return false
         }
+
+        val newRecord = AttendanceRecord(roll, name, System.currentTimeMillis(), "Present", studentId, classId)
+        val updatedRecords = existingRecords.toMutableList().apply { add(newRecord) }
+
+        AttendanceStorage.save(context, classId, today, updatedRecords)
+        updateMasterCsvSafely(context, classId, today)
 
         return true
     }
@@ -37,32 +29,29 @@ object ClassAttendanceManager {
     }
 
     fun removeRecord(context: Context, date: Date, classId: String, record: AttendanceRecord): Boolean {
-        val list = AttendanceStorage.load(context, classId, date)
-        val idx = list.indexOfFirst { it.roll == record.roll && it.name == record.name && it.timestamp == record.timestamp }
-        if (idx < 0) return false
+        val records = AttendanceStorage.load(context, classId, date).toMutableList()
+        val removed = records.removeIf {
+            it.roll == record.roll && it.name == record.name && it.timestamp == record.timestamp
+        }
 
-        val newList = list.toMutableList()
-        newList.removeAt(idx)
-        AttendanceStorage.save(context, classId, date, newList)
+        if (removed) {
+            AttendanceStorage.save(context, classId, date, records)
+            updateMasterCsvSafely(context, classId, date)
+        }
 
+        return removed
+    }
+
+    fun getMasterCsvFile(context: Context, classId: String): File {
+        updateMasterCsvSafely(context, classId, Date())
+        return AttendanceStorage.getMasterCsvFile(context, classId)
+    }
+
+    private fun updateMasterCsvSafely(context: Context, classId: String, date: Date) {
         try {
             AttendanceStorage.updateMasterCsv(context, classId, date)
         } catch (e: Exception) {
-            android.util.Log.w("ClassAttendanceManager", "updateMasterCsv failed after remove: ${e.message}")
+            Log.w("ClassAttendanceManager", "Failed to update master CSV: ${e.message}")
         }
-
-        return true
-    }
-
-    /**
-     * Export the master CSV file for the class.
-     */
-    fun getMasterCsvFile(context: Context, classId: String): File {
-        try {
-            AttendanceStorage.updateMasterCsv(context, classId, Date())
-        } catch (e: Exception) {
-            android.util.Log.w("ClassAttendanceManager", "updateMasterCsv before export failed: ${e.message}")
-        }
-        return AttendanceStorage.getMasterCsvFile(context, classId)
     }
 }

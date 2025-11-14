@@ -5,25 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="@dimen/toolbar_height"
         android:background="?attr/colorPrimary"
-        app:title="AttendEase"
+        android:elevation="4dp"
+        app:title="@string/title_class_selection"
         app:titleCentered="true"
         app:titleTextAppearance="@style/ToolbarTitleBold" />
 
-    <!-- Content sits below toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="12dp"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="@dimen/toolbar_height">
 
-        <!-- Header -->
         <TextView
             android:id="@+id/headerView"
             android:layout_width="match_parent"
@@ -37,7 +35,6 @@
             android:textColor="@android:color/white"
             android:layout_marginBottom="8dp" />
 
-        <!-- Main List -->
         <ListView
             android:id="@+id/listClasses"
             android:layout_width="match_parent"
@@ -46,7 +43,6 @@
             android:divider="@android:color/darker_gray"
             android:dividerHeight="1dp" />
 
-        <!-- Bottom row buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,9 +55,8 @@
                 android:id="@+id/btnCreateClass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New Class" />
+                android:text="@string/btn_new_class" />
 
-            <!-- Flexible spacer to push Manage Classes to right -->
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -71,7 +66,7 @@
                 android:id="@+id/btnManageClasses"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Manage Classes" />
+                android:text="@string/btn_manage_classes" />
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

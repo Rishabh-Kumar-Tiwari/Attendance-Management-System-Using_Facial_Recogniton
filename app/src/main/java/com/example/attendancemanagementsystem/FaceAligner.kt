@@ -8,26 +8,33 @@ import kotlin.math.max
 object FaceAligner {
 
     fun alignFace(source: Bitmap, face: Face, outputSize: Int = 160): Bitmap {
-        val bbox: Rect = face.boundingBox
+        val boundingBox: Rect = face.boundingBox
+        val maxDimension = max(boundingBox.width(), boundingBox.height())
+        val margin = (0.4f * maxDimension).toInt()
 
-        val margin = (0.4f * max(bbox.width(), bbox.height())).toInt()
-        val left = (bbox.left - margin).coerceAtLeast(0)
-        val top = (bbox.top - margin).coerceAtLeast(0)
-        val right = (bbox.right + margin).coerceAtMost(source.width)
-        val bottom = (bbox.bottom + margin).coerceAtMost(source.height)
-        val width = right - left
-        val height = bottom - top
-        val size = max(width, height)
+        val expandedLeft = (boundingBox.left - margin).coerceAtLeast(0)
+        val expandedTop = (boundingBox.top - margin).coerceAtLeast(0)
+        val expandedRight = (boundingBox.right + margin).coerceAtMost(source.width)
+        val expandedBottom = (boundingBox.bottom + margin).coerceAtMost(source.height)
 
-        var cx = left + width / 2
-        var cy = top + height / 2
-        var sqLeft = (cx - size / 2).coerceAtLeast(0)
-        var sqTop = (cy - size / 2).coerceAtLeast(0)
-        if (sqLeft + size > source.width) sqLeft = (source.width - size).coerceAtLeast(0)
-        if (sqTop + size > source.height) sqTop = (source.height - size).coerceAtLeast(0)
+        val expandedWidth = expandedRight - expandedLeft
+        val expandedHeight = expandedBottom - expandedTop
+        val squareSize = max(expandedWidth, expandedHeight)
 
-        val cropped = Bitmap.createBitmap(source, sqLeft, sqTop, size, size)
-        val resized = Bitmap.createScaledBitmap(cropped, outputSize, outputSize, true)
-        return resized
+        val centerX = expandedLeft + expandedWidth / 2
+        val centerY = expandedTop + expandedHeight / 2
+
+        var squareLeft = (centerX - squareSize / 2).coerceAtLeast(0)
+        var squareTop = (centerY - squareSize / 2).coerceAtLeast(0)
+
+        if (squareLeft + squareSize > source.width) {
+            squareLeft = (source.width - squareSize).coerceAtLeast(0)
+        }
+        if (squareTop + squareSize > source.height) {
+            squareTop = (source.height - squareSize).coerceAtLeast(0)
+        }
+
+        val croppedFace = Bitmap.createBitmap(source, squareLeft, squareTop, squareSize, squareSize)
+        return Bitmap.createScaledBitmap(croppedFace, outputSize, outputSize, true)
     }
 }

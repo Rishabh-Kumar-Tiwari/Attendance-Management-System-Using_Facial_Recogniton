@@ -1,43 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- App theme (light / default) -->
     <style name="Theme.AttendanceManagementSystem" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Brand colours -->
         <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryContainer">@color/purple_100</item>
-        <item name="colorOnPrimary">@color/on_primary</item>
-
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/teal_400</item>
-        <item name="colorOnSecondary">@color/on_primary</item>
-
-        <!-- Surface & background -->
-        <item name="android:windowBackground">@color/gray_50</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowBackground">@color/white</item>
         <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/on_surface</item>
-
-        <!-- Keep system bars untouched (do NOT set android:statusBarColor/navigationBarColor here) -->
+        <item name="colorOnSurface">@color/gray_900</item>
+        <item name="colorError">@color/red_500</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:statusBarColor">#FF212121</item>
         <item name="android:windowLightStatusBar">false</item>
-
-        <!-- Fonts -->
-        <item name="android:fontFamily">@font/roboto</item>
-
-        <!-- Widget defaults -->
-        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
-        <item name="switchStyle">@style/Widget.Material3.CompoundButton.Switch</item>
-
-        <!-- Toolbar style applied app-wide (definition lives in styles.xml) -->
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
         <item name="toolbarStyle">@style/CustomToolbar</item>
-        <item name="materialToolbarStyle">@style/CustomToolbar</item>
-
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Splash theme used in AndroidManifest for the launcher activity -->
     <style name="Theme.Splash" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- A plain background (use your branded gradient/drawable if you prefer) -->
-        <item name="android:windowBackground">@color/purple_500</item>
-        <!-- Do not set statusBarColor here — allow the system to keep its default -->
+        <item name="android:windowBackground">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 

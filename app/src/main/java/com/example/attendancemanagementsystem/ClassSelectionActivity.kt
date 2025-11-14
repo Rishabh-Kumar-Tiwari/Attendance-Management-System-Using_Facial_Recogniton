@@ -1,166 +1,158 @@
 package com.example.attendancemanagementsystem
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import com.example.attendancemanagementsystem.databinding.ActivityClassSelectionBinding
 
-class ClassSelectionActivity : AppCompatActivity() {
+class ClassSelectionActivity : BaseActivity() {
+
     private lateinit var binding: ActivityClassSelectionBinding
-    private val adapterItems = mutableListOf<String>()
-    private val adapterIds = mutableListOf<String>()
+    private val classNames = mutableListOf<String>()
+    private val classIds = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityClassSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        InsetsUtil.applyEdgeToEdge(
-            window = window,
-            root = binding.root,
-            toolbar = binding.topAppBar,
-            contentContainer = binding.headerView.parent as View,
-            navAnchoredView = binding.listClasses.parent as View
-        )
-
         setSupportActionBar(binding.topAppBar)
+        setupListeners()
+        loadClasses()
+    }
 
-        binding.btnCreateClass.setTypeface(null, Typeface.NORMAL)
-        binding.btnManageClasses.setTypeface(null, Typeface.NORMAL)
-
-        binding.btnCreateClass.setOnClickListener { showCreateDialog() }
-
-        binding.btnManageClasses.setOnClickListener { showManageChooser() }
+    private fun setupListeners() {
+        binding.btnCreateClass.setOnClickListener { showCreateClassDialog() }
+        binding.btnManageClasses.setOnClickListener { showManageClassesDialog() }
 
         binding.listClasses.setOnItemClickListener { _, _, position, _ ->
-            val id = adapterIds[position]
-            val name = adapterItems[position]
-            val intent = Intent().apply {
-                putExtra("classId", id)
-                putExtra("className", name)
-            }
-            setResult(RESULT_OK, intent)
-            finish()
+            val classId = classIds[position]
+            val className = classNames[position]
+            returnSelectedClass(classId, className)
         }
-
-        loadList()
     }
 
-    private fun loadList() {
-        adapterItems.clear()
-        adapterIds.clear()
-        val classes = ClassStorage.listClasses(this)
+    private fun loadClasses() {
+        classNames.clear()
+        classIds.clear()
 
-        val sorted = classes.sortedWith { a, b ->
-            val na = a.name.trim()
-            val nb = b.name.trim()
-            val ra = leadingInt(na)
-            val rb = leadingInt(nb)
+        val classes = ClassStorage.listClasses(this).sortedWith { a, b ->
+            val nameA = a.name.trim()
+            val nameB = b.name.trim()
+            val numA = extractLeadingNumber(nameA)
+            val numB = extractLeadingNumber(nameB)
+
             when {
-                ra != null && rb != null -> ra.compareTo(rb)
-                ra != null && rb == null -> -1
-                ra == null && rb != null -> 1
-                else -> na.compareTo(nb, ignoreCase = true)
+                numA != null && numB != null -> numA.compareTo(numB)
+                numA != null -> -1
+                numB != null -> 1
+                else -> nameA.compareTo(nameB, ignoreCase = true)
             }
         }
 
-        for (c in sorted) {
-            adapterIds.add(c.id)
-            adapterItems.add("${c.name} ${if (c.subject.isNotBlank()) "— ${c.subject}" else ""}")
+        classes.forEach { classRoom ->
+            classIds.add(classRoom.id)
+            val displayName = if (classRoom.subject.isNotBlank()) {
+                "${classRoom.name} — ${classRoom.subject}"
+            } else {
+                classRoom.name
+            }
+            classNames.add(displayName)
         }
 
-        binding.listClasses.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, adapterItems)
-        binding.headerView.text = "Existing Classes : ${adapterItems.size}"
+        binding.listClasses.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, classNames)
+        binding.headerView.text = getString(R.string.msg_existing_classes, classNames.size)
     }
 
-    private fun leadingInt(s: String): Int? {
-        var i = 0
-        val len = s.length
-        while (i < len && s[i].isWhitespace()) i++
-        val start = i
-        while (i < len && s[i].isDigit()) i++
-        if (i == start) return null
-        return try {
-            s.substring(start, i).toIntOrNull()
-        } catch (e: Exception) {
-            null
-        }
+    private fun extractLeadingNumber(text: String): Int? {
+        var index = 0
+        while (index < text.length && text[index].isWhitespace()) index++
+
+        val startIndex = index
+        while (index < text.length && text[index].isDigit()) index++
+
+        return if (index > startIndex) text.substring(startIndex, index).toIntOrNull() else null
     }
 
-    private fun showCreateDialog() {
-        val input = android.widget.EditText(this).apply { hint = "Class name" }
-        val subj = android.widget.EditText(this).apply { hint = "Subject (optional)" }
-        val layout = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL
-            val pad = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                16f,
-                resources.displayMetrics
-            ).toInt()
-            setPadding(pad, pad / 2, pad, pad / 2)
-            addView(input)
-            addView(subj)
+    private fun showCreateClassDialog() {
+        val nameInput = EditText(this).apply { hint = getString(R.string.hint_class_name) }
+        val subjectInput = EditText(this).apply { hint = getString(R.string.hint_subject_optional) }
+
+        val dialogLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
+            setPadding(padding, padding / 2, padding, padding / 2)
+            addView(nameInput)
+            addView(subjectInput)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Create class")
-            .setView(layout)
-            .setPositiveButton("Create") { _, _ ->
-                val name = input.text.toString().trim()
-                val subject = subj.text.toString().trim()
-                if (name.isNotBlank()) {
-                    val room = ClassStorage.createClass(this, name, subject)
-                    loadList()
-                    val intent = Intent().apply {
-                        putExtra("classId", room.id)
-                        putExtra("className", room.name)
-                    }
-                    setResult(RESULT_OK, intent)
-                    finish()
+            .setTitle(getString(R.string.dialog_create_class_title))
+            .setView(dialogLayout)
+            .setPositiveButton(getString(R.string.btn_create)) { _, _ ->
+                val className = nameInput.text.toString().trim()
+                val subject = subjectInput.text.toString().trim()
+
+                if (className.isNotBlank()) {
+                    val newClass = ClassStorage.createClass(this, className, subject)
+                    loadClasses()
+                    returnSelectedClass(newClass.id, newClass.name)
                 } else {
-                    runOnUiThread {
-                        android.widget.Toast.makeText(this, "Enter a class name", android.widget.Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(this, getString(R.string.msg_enter_class_name), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.btn_cancel), null)
             .show()
     }
 
-    private fun showManageChooser() {
+    private fun showManageClassesDialog() {
         val classes = ClassStorage.listClasses(this)
         if (classes.isEmpty()) {
-            runOnUiThread {
-                android.widget.Toast.makeText(this, "No classes to manage. Create one first.", android.widget.Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(this, getString(R.string.msg_no_classes_to_manage), Toast.LENGTH_SHORT).show()
             return
         }
-        val names = classes.map {
-            "${it.name} ${if (it.subject.isNotBlank()) "— ${it.subject}" else ""}"
+
+        val classDisplayNames = classes.map { classRoom ->
+            if (classRoom.subject.isNotBlank()) {
+                "${classRoom.name} — ${classRoom.subject}"
+            } else {
+                classRoom.name
+            }
         }.toTypedArray()
+
         AlertDialog.Builder(this)
-            .setTitle("Select class to manage")
-            .setItems(names) { _, which ->
-                val id = classes[which].id
-                val i = Intent(this, ClassDetailActivity::class.java)
-                i.putExtra("classId", id)
-                startActivity(i)
+            .setTitle(getString(R.string.dialog_select_class_title))
+            .setItems(classDisplayNames) { _, which ->
+                navigateToClassDetail(classes[which].id)
             }
             .show()
     }
 
-    @Deprecated(
-        "This method has been deprecated in favor of using the\n" +
-                "      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n" +
-                "      The OnBackPressedDispatcher controls how back button events are dispatched\n" +
-                "      to one or more {@link OnBackPressedCallback} objects."
-    )
+    private fun navigateToClassDetail(classId: String) {
+        val intent = Intent(this, ClassDetailActivity::class.java).apply {
+            putExtra("classId", classId)
+        }
+        startActivity(intent)
+    }
+
+    private fun returnSelectedClass(classId: String, className: String) {
+        val resultIntent = Intent().apply {
+            putExtra("classId", classId)
+            putExtra("className", className)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        @Suppress("DEPRECATION")
+        super.onBackPressed()
         finishAffinity()
     }
 }

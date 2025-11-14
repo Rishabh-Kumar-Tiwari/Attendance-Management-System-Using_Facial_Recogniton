@@ -33,40 +33,29 @@ class CameraAnalyzer(
         val rotation = imageProxy.imageInfo.rotationDegrees
         val inputImage = InputImage.fromMediaImage(mediaImage, rotation)
 
-        // run ML Kit detection (async)
         detectorHelper.detect(inputImage) { faces ->
             try {
                 if (faces.isNotEmpty()) {
-                    val face = chooseLargestFace(faces)
-                    // Convert mediaImage -> rotated bitmap in the same orientation ML Kit used
+                    val largestFace = selectLargestFace(faces)
                     val rotatedBitmap = detectorHelper.mediaImageToBitmap(mediaImage, rotation)
-                    // Align & crop the face (returns resized square bitmap, default 160x160)
-                    val aligned = FaceAligner.alignFace(rotatedBitmap, face)
-                    // bounding box is relative to rotatedBitmap coordinates (face.boundingBox)
-                    onFaceDetected(aligned, face.boundingBox, rotatedBitmap.width, rotatedBitmap.height)
-                } else {
-                    // no face: notify caller with null by not calling; caller can clear overlay
+                    val alignedFace = FaceAligner.alignFace(rotatedBitmap, largestFace)
+                    onFaceDetected(alignedFace, largestFace.boundingBox, rotatedBitmap.width, rotatedBitmap.height)
                 }
             } catch (e: Exception) {
-                Log.e("CameraAnalyzer", "analyze error: ${e.message}", e)
+                Log.e("CameraAnalyzer", "Face detection error: ${e.message}", e)
             } finally {
                 imageProxy.close()
             }
         }
     }
 
-    private fun chooseLargestFace(faces: List<Face>): Face {
-        var best = faces[0]
-        var bestArea = best.boundingBox.width() * best.boundingBox.height()
-        for (f in faces) {
-            val area = f.boundingBox.width() * f.boundingBox.height()
-            if (area > bestArea) {
-                best = f
-                bestArea = area
-            }
-        }
-        return best
+    private fun selectLargestFace(faces: List<Face>): Face {
+        return faces.maxByOrNull { face ->
+            face.boundingBox.width() * face.boundingBox.height()
+        } ?: faces.first()
     }
 
-    fun stop() { active = false }
+    fun stop() {
+        active = false
+    }
 }
